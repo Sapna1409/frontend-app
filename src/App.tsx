@@ -1,97 +1,58 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const API_URL = "https://sapna-backend-api.onrender.com";
 
 function App() {
+  const [users, setUsers] = useState<User[]>([]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [users, setUsers] = useState<any[]>([]);
 
-  // ✅ GET USERS
-  const getUsers = async () => {
+  // ✅ Get users
+  const fetchUsers = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/users");
-      const data = await res.json();
-      setUsers(data);
-    } catch (err) {
-      console.log("Error fetching users:", err);
+      const res = await axios.get(`${API_URL}/users`);
+      setUsers(res.data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
     }
   };
 
-  // ✅ ADD USER
+  // ✅ Add user
   const addUser = async () => {
-    <button onClick={addUser}>Add User</button>
-  try {
-    const response = await fetch('http://localhost:8000/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email }), // name aur email state se aa rahe hain
-    });
+    if (!name || !email) return;
 
-    if (response.ok) {
-      setName(''); // Input box khali karne ke liye
-      setEmail('');
-      getUsers();  // <--- Ye sabse important hai, isse list turant update hogi
-    }
-  } catch (err) {
-    console.error("Add error:", err);
-  }
-};
-
-  // ✅ DELETE USER
-  const deleteUser = async (id: number) => {
     try {
-      await fetch(`http://localhost:8000/users/${id}`, {
-        method: "DELETE",
-      });
-
-      getUsers();
-    } catch (err) {
-      console.log("Delete error:", err);
+      await axios.post(`${API_URL}/users`, { name, email });
+      setName("");
+      setEmail("");
+      fetchUsers();
+    } catch (error) {
+      console.error("Error adding user:", error);
     }
   };
 
-  // ✅ UPDATE USER
-  const updateUser = async (id: number) => {
-    const newName = prompt("Enter new name");
-    const newEmail = prompt("Enter new email");
-
-    if (!newName || !newEmail) return;
-
-    try {
-      await fetch(`http://127.0.0.1:8000/users/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newName,
-          email: newEmail,
-        }),
-      });
-
-      getUsers();
-    } catch (err) {
-      console.log("Update error:", err);
-    }
-  };
-
-  // ✅ AUTO LOAD USERS
   useEffect(() => {
-    getUsers();
+    fetchUsers();
   }, []);
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>User Management</h2>
+      <h1>User Management</h1>
 
-      {/* FORM */}
       <input
         type="text"
         placeholder="Name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
+
       <br /><br />
 
       <input
@@ -100,35 +61,20 @@ function App() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
+
       <br /><br />
 
       <button onClick={addUser}>Add User</button>
 
-      <hr />
-
-      <h3>User List</h3>
+      <h2>User List</h2>
 
       {users.length === 0 ? (
         <p>No users found 😢</p>
       ) : (
         <ul>
-          {users.map((user: any) => (
+          {users.map((user) => (
             <li key={user.id}>
               {user.name} - {user.email}
-
-              <button
-                onClick={() => deleteUser(user.id)}
-                style={{ marginLeft: "10px" }}
-              >
-                Delete ❌
-              </button>
-
-              <button
-                onClick={() => updateUser(user.id)}
-                style={{ marginLeft: "5px" }}
-              >
-                Update ✏️
-              </button>
             </li>
           ))}
         </ul>
