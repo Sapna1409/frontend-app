@@ -7,7 +7,7 @@ interface User {
   email: string;
 }
 
-const API_URL = "https://sapna-backend-api.onrender.com";
+const API_URL = "https://sapna-backend-api.onrender.com/users";
 
 function App() {
   const [users, setUsers] = useState<User[]>([]);
